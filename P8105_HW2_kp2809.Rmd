@@ -52,8 +52,24 @@ Write a short paragraph about this dataset – explain briefly what variables th
 This data set provides data on transit routes, lines, and some spatial data. I have cleaned the names of some of these variables using the janitor function. I have also labeled missing values. I also changed the responses in the entry column to a logical vector of TRUE = "yes" and FALSE = "no" entry. After selecting certain columns, there are 1858 rows and 19 columns. This is not yet tidy data. Routes are separated into more than one column and is not easy to follow. 
 
 How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
+```{r}
+transit_tidy_df |> 
+  distinct(line, station_name)
+```
+
+There are 465 distinct station names considering the two identifiers of station name and line. 
 
 How many stations are ADA compliant?
+```{r}
+transit_tidy_df |>
+  filter(ada =="TRUE")
+```
+
+The tibble I filtered for ada compliance equal to "TRUE" returned 468 rows suggesting 468 are ada compliant. 
 
 What proportion of station entrances / exits without vending allow entrance?
+```{r}
+
+```
+
 
