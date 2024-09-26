@@ -6,6 +6,7 @@ output: github_document
 ---
 ```{r include=FALSE}
 library(tidyverse)
+
 ```
 
 
@@ -44,7 +45,7 @@ transit_tidy_df=
   select( line:ada, -(staffing),-(staff_hours), -(exit_only) ) |>
   mutate(
   entry = ifelse(entry =="YES", "TRUE","FALSE"))
-
+transit_tidy_df
 ```
 
 Write a short paragraph about this dataset – explain briefly what variables the dataset contains, describe your data cleaning steps so far, and give the dimension (rows x columns) of the resulting dataset. Are these data tidy?
@@ -67,9 +68,23 @@ transit_tidy_df |>
 
 The tibble I filtered for ada compliance equal to "TRUE" returned 468 rows suggesting 468 are ada compliant. 
 
-What proportion of station entrances / exits without vending allow entrance?
-```{r}
+What proportion of station entrances or exits without vending allow entrance? 
 
+- vending = NO 
+- entry = "YES" 
+```{r}
+transit_df|>
+  janitor::clean_names() |>
+  select( line:ada, -(staffing),-(staff_hours) ) |>
+  summarise(
+    entry_no_ven = sum(vending == "NO", entry == "YES"),
+    proportion = entry_no_ven/ (sum(vending == "NO"))
+  )
+  
+  
 ```
+Out of all station entrances or exists which do not have vending, there were 1936 which did have entry. The proportion of station entrances or exits without vending allow entrance was 10.58. 
+
+Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
 
 
