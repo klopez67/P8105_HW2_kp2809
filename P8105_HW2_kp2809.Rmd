@@ -116,8 +116,21 @@ transit_tidy_route =
 
 
 How many distinct stations serve the A train? 
+```{r}
+transit_tidy_route |>
+  filter(route =="A") |> 
+  distinct(station_name, line)
+```
+There are 60 distinct station the A line serves.
 
 Of the stations that serve the A train, how many are ADA compliant?
-- ada compliant stations divided by distinct() stations that serve the == A train 
 
+- ada compliant stations divided by distinct() stations that serve the == A train 
+```{r}
+transit_tidy_route |> 
+  filter (route == "A" , ada== TRUE) |> 
+  relocate (route,ada)
+```
+
+Of those stations that serve the A train, there are 107 stations that are ada compliant. 
 
