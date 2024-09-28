@@ -27,6 +27,7 @@ transit_tidy_df=
   
 select(transit_tidy_df, line:ada, -(staffing),-(staff_hours), -(exit_only) )
 ```
+
 ```{r}
 transit_tidy_df= 
   transit_df|>
@@ -45,14 +46,15 @@ transit_tidy_df=
   select( line:ada, -(staffing),-(staff_hours), -(exit_only) ) |>
   mutate(
   entry = ifelse(entry =="YES", "TRUE","FALSE"))
-transit_tidy_df
+
 ```
 
 Write a short paragraph about this dataset – explain briefly what variables the dataset contains, describe your data cleaning steps so far, and give the dimension (rows x columns) of the resulting dataset. Are these data tidy?
 
-This data set provides data on transit routes, lines, and some spatial data. I have cleaned the names of some of these variables using the janitor function. I have also labeled missing values. I also changed the responses in the entry column to a logical vector of TRUE = "yes" and FALSE = "no" entry. After selecting certain columns, there are 1858 rows and 19 columns. This is not yet tidy data. Routes are separated into more than one column and is not easy to follow. 
+This data set provides data on transit routes, lines, and some spatial data. I have cleaned the names of some of these variables using the janitor function. I have also labeled missing values. I also changed the responses in the entry column to a logical vector of TRUE = "yes" and FALSE = "no" entry. After selecting certain columns, there are 1858 rows and 19 columns. This is not yet tidy data. Routes are separated into more than one column and is not easy to follow. Aside from that, the variable names are tidy.
 
 How many distinct stations are there? Note that stations are identified both by name and by line (e.g. 125th St 8th Avenue; 125st Broadway; 125st Lenox); the distinct function may be useful here.
+
 ```{r}
 transit_tidy_df |> 
   distinct(line, station_name)
@@ -66,25 +68,40 @@ transit_tidy_df |>
   filter(ada =="TRUE")
 ```
 
-The tibble I filtered for ada compliance equal to "TRUE" returned 468 rows suggesting 468 are ada compliant. 
+The tibble I filtered for ada compliance equal to "TRUE" returned 468 rows suggesting 468 stations are ada compliant. 
 
 What proportion of station entrances or exits without vending allow entrance? 
 
-- vending = NO 
-- entry = "YES" 
+- station entry = true and vending = NO (entry = "YES" ) 
+- and station exit and vending = NO 
 ```{r}
 transit_df|>
   janitor::clean_names() |>
   select( line:ada, -(staffing),-(staff_hours) ) |>
-  summarise(
-    entry_no_ven = sum(vending == "NO", entry == "YES"),
-    proportion = entry_no_ven/ (sum(vending == "NO"))
-  )
-  
-  
+  filter(entry == "YES"| exit_only == "Yes",vending== "NO") 
 ```
-Out of all station entrances or exists which do not have vending, there were 1936 which did have entry. The proportion of station entrances or exits without vending allow entrance was 10.58. 
 
-Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
+- stations that allow entrance is 117. 
+```{r}
+transit_df|>
+  janitor::clean_names() |>
+  select( line:ada, -(staffing),-(staff_hours) ) |>
+  filter(entry == "YES"| exit_only == "Yes",vending== "NO") |> 
+  filter(entry=="YES")
+```
+- after the initial condition of entry OR exits without vending, stations that allow entry was 69.  
+```{r}
+69/117
+```
+
+There were 117 stations with a station entry or exit and without vending. Of those stations, there were 69 stations that allowed entry. Therefore, the proportion of station entrances or exits without vending which allow entrance was 69/117 or 0.59. 
+
+Reformat data so that route number and route name are distinct variables. 
+- 
+
+How many distinct stations serve the A train? 
+
+Of the stations that serve the A train, how many are ADA compliant?
+- ada compliant stations divided by distinct() stations that serve the == A train 
 
 
