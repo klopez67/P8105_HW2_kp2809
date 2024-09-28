@@ -157,13 +157,47 @@ trash_df =
 
 ```
 Use a similar process to import, clean, and organize the data for Professor Trash Wheel and Gwynnda, and combine this with the Mr. Trash Wheel dataset to produce a single tidy dataset. To keep track of which Trash Wheel is which, you may need to add an additional variable to both datasets before combining.
+
+Imported both datasets and added the same column which specifies which wheel the data is coming from.
 ```{r}
 gwynnda_df = 
   read_excel("202309 Trash Wheel Collection Data.xlsx", 
     sheet = "Gwynnda Trash Wheel", 
     range = "A2:L157")|>
-  janitor::clean_names()
+  janitor::clean_names()|>
+  mutate(
+    wheel= "gwynnda"
+  )
 
+professor_df = 
+  read_excel("202309 Trash Wheel Collection Data.xlsx", 
+    sheet = "Professor Trash Wheel", 
+    range = "A2:M106") |>
+  janitor::clean_names()|>
+  mutate(
+    wheel= "professor"
+  )
+trash_df = 
+  read_excel("202309 Trash Wheel Collection Data.xlsx", 
+    sheet = "Mr. Trash Wheel",
+    range = "A2:N586") |>
+  janitor::clean_names()|>
+  mutate(
+    sports_balls= round(sports_balls,digit=1), 
+    sports_balls = as.integer(sports_balls), 
+    wheel= "mr", 
+    year= as.numeric(year)
+  )
+
+```
+
+Merge the 3 datasets
+
+- merge using the stack bind() method 
+
+```{r}
+wheel_df = 
+  bind_rows(trash_df,gwynnda_df,professor_df)
 ```
 
 
