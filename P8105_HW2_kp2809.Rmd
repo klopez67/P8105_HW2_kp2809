@@ -200,8 +200,28 @@ wheel_df =
   bind_rows(trash_df,gwynnda_df,professor_df)
 ```
 
-
 Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of cigarette butts collected by Gwynnda in June of 2022?
+
+```{r}
+wheel_df |>
+  filter(wheel == "professor") |>
+  summarize(
+     sum = sum(weight_tons)
+  )
+```
+
+
+```{r}
+wheel_df |>
+  filter(month == "June", wheel == "gwynnda", year== "2022") |>
+  summarize(
+     sum = sum(cigarette_butts)
+  )
+```
+
+There are `r nrow(wheel_df)` rows in the wheel_df which holds row entries from gwynnda `r nrow(gwynnda_df)` rows, professor `r nrow(professor_df)` rows, and mr. wheel datasets `r nrow(trash_df)` rows. Each row observation still shows observations from a date taken at a moment in time (year). Some key variables are `r colnames(wheel_df)` where "wheel" describes if the observations are from Mr.Trash wheel, Professor Trash Wheel, or Gwynnda Trash Wheel.
+The total weight of trash collected by Professor Trash Wheel was 212.16 tons. 18,120 cigarette butts in June 2022 collected by Gwynnda Trash Wheel.
+
 
 
 
