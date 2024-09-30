@@ -223,5 +223,53 @@ There are `r nrow(wheel_df)` rows in the wheel_df which holds row entries from g
 The total weight of trash collected by Professor Trash Wheel was 212.16 tons. 18,120 cigarette butts in June 2022 collected by Gwynnda Trash Wheel.
 
 
+## Problem 3 
+
+In the first part of this problem, your goal is to create a single, well-organized dataset with all the information contained in these data files. 
+
+- import, clean, tidy, and otherwise wrangle each of these dataset
+- check for completeness and correctness across datasets (e.g. by viewing individual datasets and using anti_join)
+- merge to create a single, final dataset; and organize this so that variables and observations are in meaningful orders. 
+- Export the result as a CSV in the directory containing the original datasets.
+
+```{r}
+bakers_df = 
+  read_csv("gbb_datasets/bakers.csv", na= c("NA","",".")) |> 
+  janitor:: clean_names() |>
+  separate(
+    baker_name, into = c("baker","last_name"), sep=" "
+    ) |> 
+  mutate(baker= str_to_lower(baker))
+
+bakes_df = 
+  read_csv("gbb_datasets/bakes.csv", na= c("NA","",".")) |> 
+  janitor:: clean_names() |> 
+  mutate(baker= str_to_lower(baker))
+
+results_df = 
+  read_csv("gbb_datasets/results.csv", na= c("NA","","."),
+           skip = 2) |> 
+  janitor:: clean_names() |> 
+  mutate(baker = str_to_lower(baker))
+```
+
+
+Describe the cleaning process any questions or state why you made those decisions. Breifly discuss the final dataset
+
+
+Create a reader-friendly table showing the star baker or winner of each episode in Seasons 5 through 10. Comment on this table – were there any predictable overall winners? Any surprises?
+
+
+Import, clean, tidy, and organize the viewership data in viewers.csv. Show the first 10 rows of this dataset. What was the average viewership in Season 1? In Season 5?
+
+```{r}
+viewers_df = 
+  read_csv("gbb_datasets/viewers.csv", na= c("NA","",".")) |> 
+  janitor:: clean_names()
+```
+
+
+
+
 
 
