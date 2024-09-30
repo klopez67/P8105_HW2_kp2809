@@ -229,6 +229,8 @@ In the first part of this problem, your goal is to create a single, well-organiz
 
 - import, clean, tidy, and otherwise wrangle each of these dataset
 - check for completeness and correctness across datasets (e.g. by viewing individual datasets and using anti_join)
+--> describe how many distinct names in each and check if the highest is still present in the end 
+
 - merge to create a single, final dataset; and organize this so that variables and observations are in meaningful orders. 
 - Export the result as a CSV in the directory containing the original datasets.
 
@@ -251,11 +253,32 @@ results_df =
            skip = 2) |> 
   janitor:: clean_names() |> 
   mutate(baker = str_to_lower(baker))
+  
+```
+
+
+```{r}
+bakers_series = 
+  full_join( results_df, bakes_df, by = c("baker", "episode", "series")) |> 
+  relocate( baker, series, episode) 
+
+bakers_series
+
+```
+```{r}
+bakers_full= 
+  full_join (bakers_df,bakers_series, by = c("baker","series")) |>
+  mutate(
+    first_name = baker, 
+    last_name = str_to_lower(last_name)
+  )|> 
+  relocate(first_name, last_name, series, episode)
 ```
 
 
 Describe the cleaning process any questions or state why you made those decisions. Breifly discuss the final dataset
-
+I imported the datasets accounting for any missing data. I skipped 2 lines for the "results_df" since the first two rows were not column names. I cleaned the column names by using janitor and clean names functions. I also seperated the bakers names from the "bakers_df" as it had both first and last names. This made it easier to combine these datasets by two identifiers series, episode, and name. I combined bakers_df by only bakers first name and series as it did not have a episode column. Since each datasets measured different observations, I joined the datasets. I used full join to ensure that no episodes were lost from left or right joining when joining results_df and bakes_df. I then joined the bakers_df by baker and series to the dataset I then The final dataset has 
+`r nrow(bakers_series)`
 
 Create a reader-friendly table showing the star baker or winner of each episode in Seasons 5 through 10. Comment on this table – were there any predictable overall winners? Any surprises?
 
