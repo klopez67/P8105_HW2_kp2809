@@ -46,7 +46,7 @@ transit_tidy_df=
   janitor::clean_names() |>
   select( line:ada, -(staffing),-(staff_hours), -(exit_only) ) |>
   mutate(
-  entry = ifelse(entry =="YES", "TRUE","FALSE"))
+  entry = ifelse(entry =="YES", TRUE,FALSE))
 
 ```
 
@@ -58,7 +58,8 @@ How many distinct stations are there? Note that stations are identified both by 
 
 ```{r}
 transit_tidy_df |> 
-  distinct(line, station_name)
+  select(line, station_name)|>
+  distinct()
 ```
 
 There are 465 distinct station names considering the two identifiers of station name and line. 
@@ -66,36 +67,26 @@ There are 465 distinct station names considering the two identifiers of station 
 How many stations are ADA compliant?
 ```{r}
 transit_tidy_df |>
-  filter(ada =="TRUE")
+  filter(ada== TRUE) |>
+  select(station_name, line)|>
+  distinct()
 ```
 
-The tibble I filtered for ada compliance equal to "TRUE" returned 468 rows suggesting 468 stations are ada compliant. 
+The tibble I filtered for ada compliance equal to "TRUE" returned 468 rows suggesting 468 stations are ada compliant, but I needed to remove duplicate stations. There are 84 distinct stations which are ada compliant.
 
 What proportion of station entrances or exits without vending allow entrance? 
 
 - station entry = true and vending = NO (entry = "YES" ) 
 - and station exit and vending = NO 
 ```{r}
-transit_df|>
-  janitor::clean_names() |>
-  select( line:ada, -(staffing),-(staff_hours) ) |>
-  filter(entry == "YES"| exit_only == "Yes",vending== "NO") 
+transit_tidy_df|>
+  filter(vending== "NO") |>
+  pull(entry) |>
+  mean()
 ```
 
-- stations that allow entrance is 117. 
-```{r}
-transit_df|>
-  janitor::clean_names() |>
-  select( line:ada, -(staffing),-(staff_hours) ) |>
-  filter(entry == "YES"| exit_only == "Yes",vending== "NO") |> 
-  filter(entry=="YES")
-```
-- after the initial condition of entry OR exits without vending, stations that allow entry was 69.  
-```{r}
-69/117
-```
 
-There were 117 stations with a station entry or exit and without vending. Of those stations, there were 69 stations that allowed entry. Therefore, the proportion of station entrances or exits without vending which allow entrance was 69/117 or 0.59. 
+The proportion of station entrances or exits without vending which allow entrance was 0.38. 
 
 Reformat data so that route number and route name are distinct variables. 
 - merge all route# columns 
@@ -130,10 +121,10 @@ Of the stations that serve the A train, how many are ADA compliant?
 ```{r}
 transit_tidy_route |> 
   filter (route == "A" , ada== TRUE) |> 
-  relocate (route,ada)
+  distinct(station_name, line)
 ```
 
-Of those stations that serve the A train, there are 107 stations that are ada compliant. 
+Of those stations that serve the A train, there are 17 stations that are ada compliant. 
 
 ## Problem 2 
 
@@ -146,7 +137,7 @@ Read and clean the Mr. Trash Wheel excel sheet:
 
 ```{r}
 trash_df = 
-  read_excel("202309 Trash Wheel Collection Data.xlsx", 
+  read_excel("202409 Trash Wheel Collection Data.xlsx", 
     sheet = "Mr. Trash Wheel",
     range = "A2:N586") |>
   janitor::clean_names()|>
@@ -161,7 +152,7 @@ Use a similar process to import, clean, and organize the data for Professor Tras
 Imported both datasets and added the same column which specifies which wheel the data is coming from.
 ```{r}
 gwynnda_df = 
-  read_excel("202309 Trash Wheel Collection Data.xlsx", 
+  read_excel("202409 Trash Wheel Collection Data.xlsx", 
     sheet = "Gwynnda Trash Wheel", 
     range = "A2:L157")|>
   janitor::clean_names()|>
@@ -170,7 +161,7 @@ gwynnda_df =
   )
 
 professor_df = 
-  read_excel("202309 Trash Wheel Collection Data.xlsx", 
+  read_excel("202409 Trash Wheel Collection Data.xlsx", 
     sheet = "Professor Trash Wheel", 
     range = "A2:M106") |>
   janitor::clean_names()|>
@@ -178,7 +169,7 @@ professor_df =
     wheel= "professor"
   )
 trash_df = 
-  read_excel("202309 Trash Wheel Collection Data.xlsx", 
+  read_excel("202409 Trash Wheel Collection Data.xlsx", 
     sheet = "Mr. Trash Wheel",
     range = "A2:N586") |>
   janitor::clean_names()|>
