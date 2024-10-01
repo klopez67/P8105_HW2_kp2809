@@ -245,13 +245,32 @@ results_df =
   mutate(baker = str_to_lower(baker))
   
 ```
+
+Before I join the three datasets, I want to make sure I don't lose distinct people from each dataset. Although the `bakers_df` has 120 distinct names based on first and last names, `bakes_df` has 86 distinct names which only had given the first names.
+- there are two different toms (shown by first and last name in the `bakers_df`) and they appear in different series
+- the dataframe `bakers_df` has a better record of all the participants in the show since it has first and last name.
+```{r}
+bakes_df |>
+  distinct(baker,series)
+
+bakers_df |> 
+  distinct(baker, last_name)
+
+results_df|> 
+  distinct(baker, series)
+```
+
+
+
+
 Joining the first two datasets which have 3 matching identifiers.
 ```{r}
 bakers_series = 
-  full_join( results_df, bakes_df, by = c("baker", "episode", "series")) |> 
+  full_join( bakes_df,results_df, by = c("baker", "episode", "series")) |> 
   relocate( baker, series, episode)
 
 ```
+
 Joining the next dataset which only has 2 matching identifiers.
 ```{r}
 bakers_full= 
@@ -260,47 +279,51 @@ bakers_full=
     first_name = baker, 
     last_name = str_to_lower(last_name)
   )|> 
+  distinct(first_name, last_name, series, episode,.keep_all=TRUE)|>
   relocate(first_name, last_name, series, episode)
+
+bakers_full
 ```
 
 ```{r}
 without_match_join2 = 
   anti_join(bakers_df,bakers_series, by = c("baker","series"))
+without_match_join2
 
 without_match_join1 = 
-  anti_join(results_df, bakes_df, by = c("baker", "episode", "series"))
-
+  anti_join( bakes_df, results_df, by = c("baker", "series"))
+without_match_join1
 ```
 
+Checking to make sure I did not lose any individual person of the 120 distinct people the `bakers_df` started with
 ```{r}
-bakers_full |>
-  distinct(first_name, last_name)
-
 bakers_df |>
   distinct(baker, last_name)
+
+bakers_full |> 
+  distinct(first_name, last_name, series)
 ```
 
-After anti_joining some of these joinings for rows where x and y had no matches, I doubled checked by visually viewing some of these without-matches to ensure they are kept in the final dataset as long as they do not repeat an exisiting match with the same idenitfiers. I also ensured that the distinct names of bakers were also all present in the final dataset using the distinct function. I noticed there are 2 extra distinct names that was accumulated from the other datasets not included in the bakers_df. This could be due to a data entry error of who "jo" is since someone likely used a nick-name instead of their first and last name which requires further questioning.
+After anti_joining some of these joining for rows where x and y had no matches, I doubled checked by visually viewing some of these without-matches to ensure they are kept in the final dataset as long as they do not repeat an existing match with the same identifiers. I also ensured that the distinct names of bakers were also all present in the final dataset using the distinct function. I noticed there are 2 extra distinct names that was accumulated from the other datasets not included in the bakers_df. This could be due to a data entry error of who "jo" is since someone likely used a nick-name instead of their first and last name which requires further questioning.
 
 I imported the datasets accounting for any missing data. I skipped 2 lines for the "results_df" since the first two rows were not column names. I cleaned the column names by using janitor and clean names functions. I also separated the bakers names from the "bakers_df" as it had both first and last names. This made it easier to combine these datasets by two identifiers series, episode, and name. I combined bakers_df by only bakers first name and series as it did not have a episode column. Since each dataset measured different observations in columns, I joined the datasets. I used full join to ensure that no episodes were lost from left or right joining when joining results_df and bakes_df. I then joined the bakers_df by baker and series to the dataset since it had no episode column. The final dataset has `r nrow(bakers_full)` rows and `r ncol(bakers_full)` columns which include `r colnames(bakers_full)`. 
 
 Create a reader-friendly table showing the star baker or winner of each episode in Seasons 5 through 10. Comment on this table – were there any predictable overall winners? Any surprises?
 - use knitr function 
+- a value in the column `show_stopper` was causing indent issues in the kable() so i had to replace the indent
 
 ```{r}
 star_baker_df = 
   bakers_full |>
-  filter(result== "STAR BAKER",series > 5)|>
-  distinct(first_name, last_name, .keep_all=TRUE)|>
+  filter(result %in% c("STAR BAKER", "WINNER",series > 5))|>
+  distinct(first_name, last_name,series, .keep_all=TRUE)|>
   relocate(first_name, last_name, series)|>
   select(first_name:episode, baker_age:technical, signature_bake, show_stopper)|>
   mutate(
     first_name= str_to_title(first_name),
-    last_name = str_to_title(last_name)
-  )|>
+    last_name = str_to_title(last_name), 
+    show_stopper= gsub("\n", "<br>", show_stopper)) |>
   knitr::kable(align = 'c')
-
-star_baker_df
 ```
 I was surprised to see a young star baker or winner be as young as 19 sine the majority of winners are older adults. The amount of technical a person had seemed to show if they would be winners. However, two individuals seemed to have had the highest technical and still won in a series.
 
